@@ -1,0 +1,1161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Luxembourg Effect — Interactive Simulator</title>
+<style>
+:root {
+  --bg: #0d1117;
+  --panel: #161b22;
+  --border: #30363d;
+  --text: #c9d1d9;
+  --text-dim: #8b949e;
+  --blue: #58a6ff;
+  --orange: #f0883e;
+  --green: #3fb950;
+  --pink: #f778ba;
+  --red: #f85149;
+  --accent: #58a6ff;
+  --slider-track: #21262d;
+  --slider-fill: #58a6ff;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.5;
+  min-height: 100vh;
+}
+header {
+  padding: 1.5rem 2rem 1rem;
+  border-bottom: 1px solid var(--border);
+  text-align: center;
+}
+header h1 { font-size: 1.6rem; font-weight: 600; margin-bottom: 0.25rem; }
+header p { color: var(--text-dim); font-size: 0.9rem; }
+header a { color: var(--accent); text-decoration: none; }
+header a:hover { text-decoration: underline; }
+.about-btn {
+  font-size: 0.75rem;
+  padding: 0.2rem 0.55rem;
+  background: var(--panel);
+  color: var(--accent);
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  cursor: pointer;
+  transition: border-color 0.15s, color 0.15s;
+  vertical-align: middle;
+  margin-left: 0.5rem;
+  position: relative;
+  top: -2px;
+}
+.about-btn:hover { border-color: var(--accent); color: #fff; }
+
+.about-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  background: rgba(0,0,0,0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.about-dialog {
+  background: #1c2128;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 1.5rem 2rem;
+  max-width: 520px;
+  width: 90%;
+  position: relative;
+  color: var(--text);
+  line-height: 1.6;
+  font-size: 0.88rem;
+  box-shadow: 0 16px 48px rgba(0,0,0,0.5);
+}
+.about-dialog h2 {
+  font-size: 1.2rem;
+  margin-bottom: 0.75rem;
+  font-weight: 600;
+}
+.about-dialog p { margin-bottom: 0.6rem; }
+.about-dialog a { color: var(--accent); text-decoration: none; }
+.about-dialog a:hover { text-decoration: underline; }
+.about-close {
+  position: absolute;
+  top: 0.75rem;
+  right: 0.75rem;
+  background: none;
+  border: none;
+  color: var(--text-dim);
+  font-size: 1.4rem;
+  cursor: pointer;
+  line-height: 1;
+  padding: 0.2rem 0.4rem;
+}
+.about-close:hover { color: var(--text); }
+
+.layout {
+  display: grid;
+  grid-template-columns: 340px 1fr;
+  gap: 0;
+  min-height: calc(100vh - 120px);
+}
+aside.controls {
+  padding: 1rem 1.25rem;
+  border-right: 1px solid var(--border);
+  overflow-y: auto;
+  max-height: calc(100vh - 80px);
+  position: sticky;
+  top: 0;
+}
+.controls h2 {
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-dim);
+  margin-bottom: 0.5rem;
+  margin-top: 1rem;
+}
+.controls h2:first-child { margin-top: 0; }
+.station-label {
+  font-size: 0.72rem;
+  color: var(--text-dim);
+  margin-bottom: 0.5rem;
+}
+
+.slider-group {
+  margin-bottom: 0.7rem;
+}
+.slider-group label {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.82rem;
+  margin-bottom: 0.15rem;
+}
+.slider-group label .name { color: var(--text); }
+.slider-group label .val { color: var(--accent); font-variant-numeric: tabular-nums; }
+input[type=range] {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 6px;
+  background: var(--slider-track);
+  border-radius: 3px;
+  outline: none;
+  cursor: pointer;
+}
+input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 16px; height: 16px;
+  border-radius: 50%;
+  background: var(--slider-fill);
+  border: 2px solid var(--bg);
+  cursor: pointer;
+}
+input[type=range]::-moz-range-thumb {
+  width: 16px; height: 16px;
+  border-radius: 50%;
+  background: var(--slider-fill);
+  border: 2px solid var(--bg);
+  cursor: pointer;
+}
+
+.derived {
+  background: var(--panel);
+  border-radius: 8px;
+  padding: 0.6rem 0.75rem;
+  margin-top: 0.4rem;
+}
+.derived-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.78rem;
+  padding: 0.12rem 0;
+}
+.derived-row .lbl { color: var(--text-dim); }
+.derived-row .dval { color: var(--text); font-variant-numeric: tabular-nums; }
+
+.defaults-btn {
+  font-size: 0.72rem;
+  padding: 0.25rem 0.6rem;
+  background: var(--panel);
+  color: var(--text-dim);
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  cursor: pointer;
+  transition: border-color 0.15s, color 0.15s;
+}
+.defaults-btn:hover { border-color: var(--accent); color: var(--text); }
+
+.map-audio-btn {
+  position: absolute;
+  font-size: 0.7rem;
+  padding: 0.2rem 0.45rem;
+  background: rgba(22,27,34,0.85);
+  color: var(--pink);
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  cursor: pointer;
+  z-index: 2;
+  transition: border-color 0.15s, background 0.15s;
+  white-space: nowrap;
+}
+.map-audio-btn:hover { border-color: var(--pink); }
+.map-audio-btn.playing {
+  border-color: var(--green);
+  background: rgba(63,185,80,0.12);
+  color: var(--green);
+}
+
+/* Clickable info icons */
+.info-icon {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  line-height: 14px;
+  text-align: center;
+  font-size: 10px;
+  color: var(--text-dim);
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  cursor: pointer;
+  margin-left: 4px;
+  vertical-align: middle;
+  transition: color 0.15s, border-color 0.15s;
+  user-select: none;
+}
+.info-icon:hover { color: var(--accent); border-color: var(--accent); }
+
+.info-popup {
+  position: fixed;
+  z-index: 100;
+  background: #1c2128;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 0.6rem 0.8rem;
+  max-width: 320px;
+  font-size: 0.78rem;
+  color: var(--text);
+  line-height: 1.5;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+  pointer-events: auto;
+}
+.info-popup::before {
+  content: '';
+  position: absolute;
+  top: -6px;
+  left: 16px;
+  width: 10px;
+  height: 10px;
+  background: #1c2128;
+  border-left: 1px solid var(--border);
+  border-top: 1px solid var(--border);
+  transform: rotate(45deg);
+}
+
+section.viz {
+  padding: 1rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  overflow-y: auto;
+}
+.canvas-panel {
+  background: var(--panel);
+  border-radius: 8px;
+  padding: 0.6rem 0.75rem 0.5rem;
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  height: 260px;
+}
+.canvas-panel.spectrum { height: 280px; }
+.canvas-panel h3 {
+  font-size: 0.8rem;
+  font-weight: 500;
+  margin-bottom: 0.3rem;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  flex-shrink: 0;
+}
+.canvas-panel h3 .dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  display: inline-block;
+}
+.canvas-panel canvas {
+  flex: 1;
+  width: 100%;
+  min-height: 0;
+  border-radius: 4px;
+}
+
+/* Map panel */
+.map-panel {
+  background: var(--panel);
+  border-radius: 8px;
+  padding: 0.6rem 0.75rem 0.5rem;
+  height: 200px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+}
+.map-panel h3 {
+  font-size: 0.8rem;
+  font-weight: 500;
+  margin-bottom: 0.3rem;
+}
+.map-panel canvas {
+  border-radius: 4px;
+}
+
+footer {
+  border-top: 1px solid var(--border);
+  padding: 1rem 2rem;
+  text-align: center;
+  font-size: 0.78rem;
+  color: var(--text-dim);
+}
+footer a { color: var(--accent); text-decoration: none; }
+
+@media (max-width: 900px) {
+  .layout { grid-template-columns: 1fr; }
+  aside.controls {
+    border-right: none;
+    border-bottom: 1px solid var(--border);
+    max-height: none;
+    position: static;
+  }
+}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>The Luxembourg Effect <button class="about-btn" onclick="toggleAbout()">more&hellip;</button></h1>
+  <p>Interactive simulation of ionospheric cross-modulation &mdash;
+    <a href="luxembourg_effect.pdf">read the paper</a></p>
+</header>
+<div id="about-overlay" class="about-overlay" style="display:none" onclick="if(event.target===this)toggleAbout()">
+  <div class="about-dialog">
+    <button class="about-close" onclick="toggleAbout()">&times;</button>
+    <h2>The Luxembourg Effect</h2>
+    <p>In 1933, engineer B.D.H. Tellegen at Philips Research in Eindhoven noticed something strange: while listening to Berom&uuml;nster (652 kHz, Switzerland), he could faintly hear the program of Radio Luxembourg (230 kHz) superimposed on the signal.</p>
+    <p>The cause turned out to be <strong>ionospheric cross-modulation</strong>. Luxembourg's powerful transmitter heated free electrons in the ionosphere's D/E layer, changing how readily they absorbed radio waves. Because Luxembourg's signal was amplitude-modulated, this heating pulsed at audio frequencies &mdash; effectively imprinting Luxembourg's audio onto any other signal passing through the same region of ionosphere.</p>
+    <p>This simulator lets you explore the physics. Adjust transmitter powers, audio tones, and ionospheric conditions to see how the cross-modulation changes. The spectrum plot shows the unwanted Luxembourg sidebands (blue) appearing on Berom&uuml;nster's carrier, and the transfer function shows how the ionosphere acts as a low-pass filter on the transferred audio.</p>
+    <p style="margin-top:0.75rem;font-size:0.8rem;color:var(--text-dim)">Based on the theory of Tellegen (1933) and Bailey &amp; Martyn (1934). <a href="luxembourg_effect.pdf">Read the full derivation.</a></p>
+  </div>
+</div>
+
+<div class="layout">
+<aside class="controls">
+  <h2>Radio Luxembourg <span style="color:var(--blue)">(Disturbing)</span></h2>
+  <div class="station-label">230 kHz longwave &mdash; Junglinster, Luxembourg</div>
+  <div class="slider-group">
+    <label><span class="name">Power <span class="info-icon" data-info="Transmitter power of Radio Luxembourg. The strong signal heats ionospheric electrons, modifying the medium through which Berom&uuml;nster's signal passes. Historical value: ~150 kW.">i</span></span><span class="val" id="v-luxP"></span></label>
+    <input type="range" id="s-luxP" min="0" max="1000" value="635">
+  </div>
+  <div class="slider-group">
+    <label><span class="name">Audio Tone <span class="info-icon" data-info="Audio frequency being broadcast by Radio Luxembourg. This tone gets transferred onto Berom&uuml;nster's signal via cross-modulation in the ionosphere.">i</span></span><span class="val" id="v-luxTone"></span></label>
+    <input type="range" id="s-luxTone" min="0" max="1000" value="500">
+  </div>
+  <div class="slider-group">
+    <label><span class="name">Modulation Depth <span class="info-icon" data-info="Depth of amplitude modulation on Luxembourg's carrier. A higher modulation depth means stronger heating variations in the ionosphere, producing more cross-modulation.">i</span></span><span class="val" id="v-luxMod"></span></label>
+    <input type="range" id="s-luxMod" min="0" max="100" value="80">
+  </div>
+
+  <h2>Berom&uuml;nster <span style="color:var(--green)">(Wanted)</span></h2>
+  <div class="station-label">652 kHz medium-wave &mdash; Berom&uuml;nster, Switzerland</div>
+  <div class="slider-group">
+    <label><span class="name">Power <span class="info-icon" data-info="Transmitter power of Berom&uuml;nster. This is the 'wanted' signal that listeners in Eindhoven are trying to receive. Its power doesn't affect the cross-modulation strength. Historical value: ~60 kW.">i</span></span><span class="val" id="v-berP"></span></label>
+    <input type="range" id="s-berP" min="0" max="1000" value="556">
+  </div>
+  <div class="slider-group">
+    <label><span class="name">Audio Tone <span class="info-icon" data-info="Audio frequency being broadcast by Berom&uuml;nster. This is the station's own programming. In the spectrum, these sidebands appear in green.">i</span></span><span class="val" id="v-berTone"></span></label>
+    <input type="range" id="s-berTone" min="0" max="1000" value="700">
+  </div>
+  <div class="slider-group">
+    <label><span class="name">Modulation Depth <span class="info-icon" data-info="Depth of amplitude modulation on Berom&uuml;nster's carrier. Sets the level of Berom&uuml;nster's own sidebands relative to its carrier.">i</span></span><span class="val" id="v-berMod"></span></label>
+    <input type="range" id="s-berMod" min="0" max="100" value="80">
+  </div>
+
+  <h2>Ionosphere (D/E Layer)</h2>
+  <div class="slider-group">
+    <label><span class="name">Collision Freq &nu;<sub>0</sub> <span class="info-icon" data-info="Rate at which free electrons collide with neutral molecules in the D/E region (~85 km altitude). Higher collision frequency means more absorption but also faster thermal relaxation, which limits the bandwidth of the cross-modulation effect.">i</span></span><span class="val" id="v-nu"></span></label>
+    <input type="range" id="s-nu" min="0" max="1000" value="667">
+  </div>
+  <div class="slider-group">
+    <label><span class="name">Electron Density n<sub>e</sub> <span class="info-icon" data-info="Number of free electrons per cubic meter in the ionospheric D/E layer. Higher electron density increases the plasma frequency and absorption coefficient, strengthening the cross-modulation effect.">i</span></span><span class="val" id="v-ne"></span></label>
+    <input type="range" id="s-ne" min="0" max="1000" value="667">
+  </div>
+
+  <div style="margin-top:0.75rem">
+    <button class="defaults-btn" onclick="restoreDefaults()">Restore Defaults</button>
+  </div>
+
+  <h2>Derived Quantities</h2>
+  <div class="derived">
+    <div class="derived-row"><span class="lbl">E-field at ionosphere <span class="info-icon" data-info="Electric field strength of Luxembourg's signal when it reaches the ionosphere at ~85 km altitude. Computed from transmitter power using the Friis equation. This is what drives electron heating.">i</span></span><span class="dval" id="d-efield"></span></div>
+    <div class="derived-row"><span class="lbl">Relaxation time &tau; <span class="info-icon" data-info="Thermal relaxation time of ionospheric electrons. After heating by Luxembourg's signal, electrons cool back to equilibrium in roughly this time. Sets the low-pass cutoff: audio frequencies above 1/(2&pi;&tau;) are poorly transferred.">i</span></span><span class="dval" id="d-tau"></span></div>
+    <div class="derived-row"><span class="lbl">Heating &Delta;T&#x0304; <span class="info-icon" data-info="Time-averaged electron temperature increase caused by Luxembourg's carrier wave. Even a few Kelvin of heating changes the collision frequency enough to modulate absorption of Berom&uuml;nster's signal.">i</span></span><span class="dval" id="d-dT"></span></div>
+    <div class="derived-row"><span class="lbl">&minus;3 dB frequency <span class="info-icon" data-info="The frequency at which the cross-modulation transfer drops by 3 dB (half power). Audio content above this frequency is increasingly suppressed. Determined by the electron thermal relaxation time.">i</span></span><span class="dval" id="d-f3db"></span></div>
+    <div class="derived-row"><span class="lbl">Cross-mod depth m<sub>w</sub> <span class="info-icon" data-info="The induced modulation depth on Berom&uuml;nster's carrier due to Luxembourg's audio tone. This is the strength of the unwanted Luxembourg audio that a listener in Eindhoven would hear superimposed on Berom&uuml;nster's broadcast.">i</span></span><span class="dval" id="d-mw"></span></div>
+    <div class="derived-row"><span class="lbl">Phase lag &phi; <span class="info-icon" data-info="Phase delay of the transferred modulation relative to Luxembourg's original audio. Caused by the finite thermal response time of the ionospheric electrons.">i</span></span><span class="dval" id="d-phi"></span></div>
+  </div>
+
+</aside>
+
+<section class="viz">
+  <div class="map-panel">
+    <h3>Signal Path</h3>
+    <div style="position:relative;flex:1;min-height:0">
+      <canvas id="c-map" style="position:absolute;inset:0;width:100%;height:100%"></canvas>
+      <button id="btn-audio" onclick="toggleAudio()" class="map-audio-btn">&#x1f50a; Listen</button>
+    </div>
+  </div>
+  <div class="canvas-panel spectrum">
+    <h3><span class="dot" style="background:var(--pink)"></span>Spectrum at Eindhoven Receiver (around Berom&uuml;nster carrier)</h3>
+    <canvas id="c-spectrum"></canvas>
+  </div>
+  <div class="canvas-panel">
+    <h3 title="How efficiently Luxembourg's audio modulation transfers onto Berom&#xFC;nster's signal via the ionosphere. The ionosphere acts as a low-pass filter &#x2014; low audio frequencies transfer well, high frequencies are attenuated. The &#x2212;3 dB point is set by the electron thermal relaxation time &#x03C4;."><span class="dot" style="background:var(--orange)"></span>Modulation Transfer Function (Luxembourg &rarr; Berom&uuml;nster) <span style="color:var(--text-dim);font-size:0.7rem;cursor:help">&#9432;</span></h3>
+    <canvas id="c-freqresp"></canvas>
+  </div>
+</section>
+</div>
+
+<footer>
+  Based on the theory of Tellegen (1933) and Bailey &amp; Martyn (1934).
+  m<sub>w</sub> = 2m / &radic;(1 + &Omega;&sup2;&tau;&sup2;) &middot; &int; &beta;&kappa;<sub>0</sub>&Delta;T&#x0304;/T<sub>0</sub> ds
+  &mdash; <a href="luxembourg_effect.pdf">Full derivation (PDF)</a>
+</footer>
+
+<script>
+// ==================== PHYSICAL CONSTANTS ====================
+const PHY = {
+  e: 1.602e-19,
+  me: 9.109e-31,
+  kB: 1.381e-23,
+  c: 2.998e8,
+  eps0: 8.854e-12,
+  eta0: 376.73,
+  M: 4.65e-26,
+  T0: 200,
+  beta: 0.5,
+  Leff: 20e3,
+  rIono: 85e3,
+  Gant: 2.0,
+};
+PHY.delta = 2 * PHY.me / PHY.M;
+
+// ==================== STATE ====================
+const state = {
+  // Luxembourg
+  luxP: 150e3,       // W
+  luxTone: 400,      // Hz
+  luxMod: 0.8,
+  // Beromunster
+  berP: 60e3,        // W
+  berTone: 1000,     // Hz
+  berMod: 0.8,
+  // Ionosphere
+  nu0: 1e6,
+  ne: 1e10,
+  // Fixed carrier freqs (historical)
+  fd: 230e3,         // Luxembourg carrier
+  fw: 652e3,         // Beromunster carrier
+  // Derived
+  E0sq: 0, Efield: 0,
+  tau: 0, dTbar: 0, kappa0: 0, f3dB: 0,
+  mwLux: 0, mwLuxRaw: 0, phiLux: 0,  // cross-mod of Luxembourg tone onto Beromunster
+};
+
+function recompute() {
+  const s = state, P = PHY;
+
+  // Luxembourg E-field at ionosphere via Friis
+  const S = s.luxP * P.Gant / (4 * Math.PI * P.rIono * P.rIono);
+  s.E0sq = S * P.eta0;
+  s.Efield = Math.sqrt(s.E0sq);
+
+  const omega_d = 2 * Math.PI * s.fd;
+  const omega_w = 2 * Math.PI * s.fw;
+  const omega_p2 = s.ne * P.e * P.e / (P.me * P.eps0);
+
+  s.tau = P.M / (4 * P.me * s.nu0);
+  s.f3dB = 1 / (2 * Math.PI * s.tau);
+
+  s.dTbar = P.e * P.e * s.E0sq / (12 * P.me * P.kB * P.delta * (omega_d * omega_d + s.nu0 * s.nu0));
+
+  s.kappa0 = omega_p2 * s.nu0 / (2 * 1.0 * P.c * (omega_w * omega_w + s.nu0 * s.nu0));
+
+  // Cross-mod of Luxembourg's audio tone onto Beromunster
+  const OmegaLux = 2 * Math.PI * s.luxTone;
+  const pathInt = P.beta * s.kappa0 * s.dTbar / P.T0 * P.Leff;
+  s.mwLuxRaw = 2 * s.luxMod / Math.sqrt(1 + OmegaLux * OmegaLux * s.tau * s.tau) * pathInt;
+  s.mwLux = Math.min(s.mwLuxRaw, 0.999);  // clamp for display percentage
+  s.phiLux = Math.atan(OmegaLux * s.tau);
+}
+
+// Cross-mod depth at arbitrary modulation frequency
+function mwAtFreq(fMod) {
+  const Omega = 2 * Math.PI * fMod;
+  const P = PHY, s = state;
+  const omega_p2 = s.ne * P.e * P.e / (P.me * P.eps0);
+  const omega_w = 2 * Math.PI * s.fw;
+  const omega_d = 2 * Math.PI * s.fd;
+  const kappa0 = omega_p2 * s.nu0 / (2 * P.c * (omega_w * omega_w + s.nu0 * s.nu0));
+  const dTbar = P.e * P.e * s.E0sq / (12 * P.me * P.kB * P.delta * (omega_d * omega_d + s.nu0 * s.nu0));
+  const pathInt = P.beta * kappa0 * dTbar / P.T0 * P.Leff;
+  return Math.min(2 * s.luxMod / Math.sqrt(1 + Omega * Omega * s.tau * s.tau) * pathInt, 0.999);
+}
+
+// ==================== SLIDER MAPPING ====================
+function logMap(val, minExp, maxExp) {
+  return Math.pow(10, minExp + (maxExp - minExp) * val / 1000);
+}
+function logUnmap(phys, minExp, maxExp) {
+  return (Math.log10(phys) - minExp) / (maxExp - minExp) * 1000;
+}
+
+const sliders = {
+  's-luxP':    { get() { return logMap(this.el.value, 2, 7); }, set(v) { this.el.value = logUnmap(v, 2, 7); },
+    apply(v) { state.luxP = v; }, fmt(v) { return fmtSI(v, 'W'); }, key: 'luxP' },
+  's-luxTone': { get() { return logMap(this.el.value, Math.log10(50), Math.log10(5000)); },
+    set(v) { this.el.value = logUnmap(v, Math.log10(50), Math.log10(5000)); },
+    apply(v) { state.luxTone = v; }, fmt(v) { return fmtSI(v, 'Hz'); }, key: 'luxTone' },
+  's-luxMod':  { get() { return this.el.value / 100; }, set(v) { this.el.value = v * 100; },
+    apply(v) { state.luxMod = v; }, fmt(v) { return (v * 100).toFixed(0) + '%'; }, key: 'luxMod' },
+  's-berP':    { get() { return logMap(this.el.value, 2, 7); }, set(v) { this.el.value = logUnmap(v, 2, 7); },
+    apply(v) { state.berP = v; }, fmt(v) { return fmtSI(v, 'W'); }, key: 'berP' },
+  's-berTone': { get() { return logMap(this.el.value, Math.log10(50), Math.log10(5000)); },
+    set(v) { this.el.value = logUnmap(v, Math.log10(50), Math.log10(5000)); },
+    apply(v) { state.berTone = v; }, fmt(v) { return fmtSI(v, 'Hz'); }, key: 'berTone' },
+  's-berMod':  { get() { return this.el.value / 100; }, set(v) { this.el.value = v * 100; },
+    apply(v) { state.berMod = v; }, fmt(v) { return (v * 100).toFixed(0) + '%'; }, key: 'berMod' },
+  's-nu':      { get() { return logMap(this.el.value, 4, 7); }, set(v) { this.el.value = logUnmap(v, 4, 7); },
+    apply(v) { state.nu0 = v; }, fmt(v) { return fmtSI(v, 's\u207B\u00B9'); }, key: 'nu0' },
+  's-ne':      { get() { return logMap(this.el.value, 8, 11); }, set(v) { this.el.value = logUnmap(v, 8, 11); },
+    apply(v) { state.ne = v; }, fmt(v) { return fmtSI(v, 'm\u207B\u00B3'); }, key: 'ne' },
+};
+
+const valEls = {};
+function initSliders() {
+  for (const [id, def] of Object.entries(sliders)) {
+    def.el = document.getElementById(id);
+    const vid = 'v-' + id.slice(2);
+    valEls[id] = document.getElementById(vid);
+    def.el.addEventListener('input', () => {
+      const v = def.get();
+      def.apply(v);
+      valEls[id].textContent = def.fmt(v);
+      recompute();
+      updateDerived();
+      needsRedraw = true;
+    });
+    const v = def.get();
+    def.apply(v);
+    valEls[id].textContent = def.fmt(v);
+  }
+}
+
+function fmtSI(v, unit) {
+  if (v === 0) return '0 ' + unit;
+  const prefixes = [
+    { exp: 12, sym: 'T' }, { exp: 9, sym: 'G' }, { exp: 6, sym: 'M' },
+    { exp: 3, sym: 'k' }, { exp: 0, sym: '' }, { exp: -3, sym: 'm' },
+    { exp: -6, sym: '\u03BC' }, { exp: -9, sym: 'n' }, { exp: -12, sym: 'p' },
+  ];
+  const absv = Math.abs(v);
+  for (const p of prefixes) {
+    if (absv >= Math.pow(10, p.exp) * 0.999) {
+      const scaled = v / Math.pow(10, p.exp);
+      const digits = scaled >= 100 ? 0 : scaled >= 10 ? 1 : 2;
+      return scaled.toFixed(digits) + ' ' + p.sym + unit;
+    }
+  }
+  return v.toExponential(2) + ' ' + unit;
+}
+
+function updateDerived() {
+  document.getElementById('d-efield').textContent = fmtSI(state.Efield * 1000, 'V/m');
+  document.getElementById('d-tau').textContent = fmtSI(state.tau, 's');
+  document.getElementById('d-dT').textContent = fmtSI(state.dTbar, 'K');
+  document.getElementById('d-f3db').textContent = fmtSI(state.f3dB, 'Hz');
+  document.getElementById('d-mw').textContent = (state.mwLux * 100).toFixed(4) + '% (' +
+    (state.mwLux > 0 ? (20 * Math.log10(state.mwLux)).toFixed(1) : '-\u221E') + ' dB)';
+  document.getElementById('d-phi').textContent = (state.phiLux * 180 / Math.PI).toFixed(1) + '\u00B0';
+}
+
+
+// ==================== CANVAS SETUP ====================
+const canvases = {};
+function setupCanvas(id) {
+  const canvas = document.getElementById(id);
+  const ctx = canvas.getContext('2d');
+  canvases[id] = { canvas, ctx };
+  resizeCanvas(id);
+  return { canvas, ctx };
+}
+
+function resizeCanvas(id) {
+  const { canvas, ctx } = canvases[id];
+  const rect = canvas.parentElement.getBoundingClientRect();
+  const h = Math.max(80, rect.height - 30);
+  const w = rect.width;
+  const dpr = window.devicePixelRatio || 1;
+  canvas.width = w * dpr;
+  canvas.height = h * dpr;
+  canvas.style.width = w + 'px';
+  canvas.style.height = h + 'px';
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  return { w, h };
+}
+
+// ==================== DRAWING UTILITIES ====================
+function drawAxisLabel(ctx, text, x, y, color) {
+  ctx.fillStyle = color || '#8b949e';
+  ctx.font = '10px -apple-system, sans-serif';
+  ctx.textAlign = 'left';
+  ctx.fillText(text, x, y);
+}
+
+// ==================== MAP RENDERER ====================
+function renderMap() {
+  const { ctx } = canvases['c-map'];
+  const { w, h } = resizeCanvas('c-map');
+  ctx.clearRect(0, 0, w, h);
+
+  // Approximate positions (lon, lat) mapped to canvas
+  // Beromunster: 47.19N, 8.18E
+  // Luxembourg (Junglinster): 49.71N, 6.25E
+  // Eindhoven: 51.44N, 5.47E
+  const stations = [
+    { name: 'Berom\u00FCnster', lon: 8.18, lat: 47.19, color: '#3fb950', freq: '652 kHz', power: state.berP, tone: state.berTone },
+    { name: 'Luxembourg', lon: 6.25, lat: 49.71, color: '#58a6ff', freq: '230 kHz', power: state.luxP, tone: state.luxTone },
+    { name: 'Eindhoven', lon: 5.47, lat: 51.44, color: '#f778ba', freq: 'Receiver', power: 0, tone: 0 },
+  ];
+
+  // Map bounds with padding
+  const lonMin = 4.5, lonMax = 9.5, latMin = 46.5, latMax = 52.0;
+  const mapW = w - 40, mapH = h - 20;
+  const ox = 20, oy = 10;
+
+  function toXY(lon, lat) {
+    return {
+      x: ox + (lon - lonMin) / (lonMax - lonMin) * mapW,
+      y: oy + (latMax - lat) / (latMax - latMin) * mapH
+    };
+  }
+
+  // Draw signal path: Beromunster -> (over Luxembourg) -> Eindhoven
+  const ber = toXY(stations[0].lon, stations[0].lat);
+  const lux = toXY(stations[1].lon, stations[1].lat);
+  const ein = toXY(stations[2].lon, stations[2].lat);
+
+  // Beromunster to Eindhoven path (passes near Luxembourg)
+  ctx.strokeStyle = 'rgba(63,185,80,0.3)';
+  ctx.lineWidth = 2;
+  ctx.setLineDash([6, 4]);
+  ctx.beginPath(); ctx.moveTo(ber.x, ber.y); ctx.lineTo(ein.x, ein.y); ctx.stroke();
+  ctx.setLineDash([]);
+
+  // Luxembourg signal radiating upward (to ionosphere)
+  ctx.strokeStyle = 'rgba(88,166,255,0.3)';
+  ctx.lineWidth = 2;
+  ctx.setLineDash([4, 4]);
+  // Draw arc representing ionospheric interaction zone
+  const midX = (ber.x + ein.x) / 2;
+  const midY = Math.min(ber.y, ein.y, lux.y) - 20;
+  ctx.beginPath();
+  ctx.moveTo(lux.x, lux.y);
+  ctx.quadraticCurveTo(lux.x, midY, midX, midY);
+  ctx.stroke();
+  ctx.setLineDash([]);
+
+  // Ionosphere label
+  ctx.fillStyle = 'rgba(240,136,62,0.5)';
+  ctx.font = '9px -apple-system, sans-serif';
+  ctx.textAlign = 'center';
+  ctx.fillText('D/E Layer (~85 km)', midX, midY - 4);
+
+  // Draw interaction zone glow
+  ctx.fillStyle = 'rgba(240,136,62,0.08)';
+  ctx.beginPath();
+  ctx.ellipse(midX, midY + 5, 40, 12, 0, 0, 2 * Math.PI);
+  ctx.fill();
+
+  // Station dots and labels
+  for (const st of stations) {
+    const p = toXY(st.lon, st.lat);
+    // Dot
+    ctx.fillStyle = st.color;
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, 5, 0, 2 * Math.PI);
+    ctx.fill();
+    // Outer ring
+    ctx.strokeStyle = st.color;
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, 8, 0, 2 * Math.PI);
+    ctx.stroke();
+    // Label
+    ctx.fillStyle = st.color;
+    ctx.font = 'bold 11px -apple-system, sans-serif';
+    ctx.textAlign = st.name === 'Eindhoven' ? 'right' : 'left';
+    const lx = st.name === 'Eindhoven' ? p.x - 12 : p.x + 12;
+    ctx.fillText(st.name, lx, p.y - 8);
+    ctx.font = '9px -apple-system, sans-serif';
+    ctx.fillStyle = '#8b949e';
+    if (st.power > 0) {
+      ctx.fillText(st.freq + ' / ' + fmtSI(st.power, 'W'), lx, p.y + 5);
+      ctx.fillStyle = st.color;
+      ctx.fillText('Broadcasting ' + fmtSI(st.tone, 'Hz') + ' tone', lx, p.y + 17);
+    } else {
+      ctx.fillText(st.freq, lx, p.y + 5);
+    }
+  }
+
+  // Position the Listen button below Eindhoven
+  const btnAudio = document.getElementById('btn-audio');
+  if (btnAudio) {
+    btnAudio.style.top = (ein.y + 14) + 'px';
+    btnAudio.style.left = 'auto';
+    btnAudio.style.right = 'auto';
+    // Eindhoven label is right-aligned, so place button to the left of the dot
+    const btnLeft = ein.x - 60;
+    btnAudio.style.left = Math.max(4, btnLeft) + 'px';
+  }
+}
+
+// ==================== SPECTRUM RENDERER ====================
+function renderSpectrum() {
+  const { ctx } = canvases['c-spectrum'];
+  const { w, h } = resizeCanvas('c-spectrum');
+  ctx.clearRect(0, 0, w, h);
+
+  const pad = { l: 55, r: 25, t: 30, b: 10 };
+  const pw = w - pad.l - pad.r;
+  const ph = h - pad.t - pad.b;
+
+  // Frequency range: center on Beromunster carrier, show +/- bandwidth
+  const fc = state.fw; // 652 kHz
+  const bw = Math.max(state.luxTone, state.berTone) * 3; // show enough to see all sidebands
+  const fMin = fc - bw;
+  const fMax = fc + bw;
+
+  // Fixed dB range — 0 dB = carrier level at default 60 kW
+  const dbFloor = -40;
+  const dbMax = 30;
+
+  function freqToX(f) { return pad.l + (f - fMin) / (fMax - fMin) * pw; }
+  function dbToY(db) { return pad.t + (dbMax - db) / (dbMax - dbFloor) * ph; }
+
+  // Grid
+  ctx.strokeStyle = '#21262d';
+  ctx.lineWidth = 0.5;
+  // Horizontal dB grid lines
+  for (let db = dbFloor; db <= dbMax; db += 10) {
+    const y = dbToY(db);
+    if (db === 0) {
+      // 0 dB reference line — slightly brighter
+      ctx.strokeStyle = '#30363d';
+      ctx.lineWidth = 1;
+    } else {
+      ctx.strokeStyle = '#21262d';
+      ctx.lineWidth = 0.5;
+    }
+    ctx.beginPath(); ctx.moveTo(pad.l, y); ctx.lineTo(pad.l + pw, y); ctx.stroke();
+  }
+
+  // Noise floor shading at bottom
+  ctx.fillStyle = 'rgba(33,38,45,0.5)';
+  ctx.fillRect(pad.l, dbToY(dbFloor + 5), pw, dbToY(dbFloor) - dbToY(dbFloor + 5));
+
+  // === SPECTRAL LINES ===
+  // We'll draw each spectral component as a narrow peak (lorentzian shape for visual appeal)
+
+  function drawSpike(freq, ampDb, color, lineW) {
+    const x0 = freqToX(freq);
+    if (x0 < pad.l || x0 > pad.l + pw) return;
+    const y1 = dbToY(ampDb);
+    const yBase = dbToY(dbFloor);
+    // Spike with slight width for visibility
+    const spikeW = Math.max(2, pw * 0.003);
+    ctx.fillStyle = color;
+    ctx.globalAlpha = 0.3;
+    ctx.fillRect(x0 - spikeW / 2, y1, spikeW, yBase - y1);
+    ctx.globalAlpha = 1.0;
+    // Sharp line
+    ctx.strokeStyle = color;
+    ctx.lineWidth = lineW || 2;
+    ctx.beginPath();
+    ctx.moveTo(x0, yBase);
+    ctx.lineTo(x0, y1);
+    ctx.stroke();
+    // Peak dot
+    ctx.fillStyle = color;
+    ctx.beginPath();
+    ctx.arc(x0, y1, 3, 0, 2 * Math.PI);
+    ctx.fill();
+  }
+
+  function drawLabel(freq, ampDb, text, color, yOffset, align) {
+    const x = freqToX(freq);
+    if (x < pad.l || x > pad.l + pw) return;
+    const y = dbToY(ampDb) + (yOffset || -10);
+    ctx.fillStyle = color;
+    ctx.font = '11px -apple-system, sans-serif';
+    ctx.textAlign = align || 'center';
+    ctx.fillText(text, x, y);
+  }
+
+  // Beromunster carrier level — 0 dB at default 60 kW, scales with power
+  const berCarrierDb = 10 * Math.log10(state.berP / 60e3);
+  drawSpike(fc, berCarrierDb, '#3fb950', 2.5);
+  drawLabel(fc, berCarrierDb, 'Berom\u00FCnster', '#3fb950', -14);
+  drawLabel(fc, berCarrierDb, fmtSI(fc, 'Hz'), '#8b949e', -4);
+
+  // Beromunster's own sidebands at fc +/- berTone
+  const berSBdb = berCarrierDb + 20 * Math.log10(state.berMod / 2); // AM sideband is m/2 relative to carrier
+  drawSpike(fc + state.berTone, berSBdb, '#3fb950', 1.5);
+  drawSpike(fc - state.berTone, berSBdb, '#3fb950', 1.5);
+  drawLabel(fc + state.berTone, berSBdb, '+' + fmtSI(state.berTone, 'Hz'), '#3fb950', -8);
+  drawLabel(fc - state.berTone, berSBdb, '\u2212' + fmtSI(state.berTone, 'Hz'), '#3fb950', -8);
+
+  // Luxembourg's cross-modulated sidebands at fc +/- luxTone
+  // Use raw (unclamped) value so dB level responds to power changes
+  const luxSBdb = state.mwLuxRaw > 0 ? berCarrierDb + 20 * Math.log10(state.mwLuxRaw / 2) : dbFloor;
+  drawSpike(fc + state.luxTone, luxSBdb, '#58a6ff', 2);
+  drawSpike(fc - state.luxTone, luxSBdb, '#58a6ff', 2);
+  drawLabel(fc + state.luxTone, luxSBdb, '+' + fmtSI(state.luxTone, 'Hz'), '#58a6ff', -8);
+  drawLabel(fc - state.luxTone, luxSBdb, '\u2212' + fmtSI(state.luxTone, 'Hz'), '#58a6ff', -8);
+
+  // Label the Luxembourg sidebands source
+  const luxLabelDb = Math.max(luxSBdb, dbFloor + 15);
+  const xMid = (freqToX(fc + state.luxTone) + freqToX(fc - state.luxTone)) / 2;
+
+  // Legend
+  ctx.font = '12px -apple-system, sans-serif';
+  ctx.textAlign = 'left';
+  // Beromunster legend
+  ctx.fillStyle = '#3fb950';
+  ctx.fillRect(pad.l + 10, pad.t + 4, 12, 3);
+  ctx.fillText('Berom\u00FCnster sidebands (\u00B1' + fmtSI(state.berTone, 'Hz') + ')', pad.l + 28, pad.t + 11);
+  // Luxembourg legend
+  ctx.fillStyle = '#58a6ff';
+  ctx.fillRect(pad.l + 10, pad.t + 20, 12, 3);
+  ctx.fillText('Luxembourg cross-mod (\u00B1' + fmtSI(state.luxTone, 'Hz') + ') \u2014 ' +
+    (state.mwLux > 0 ? (20 * Math.log10(state.mwLux / 2)).toFixed(1) : '-\u221E') + ' dBc',
+    pad.l + 28, pad.t + 27);
+
+  // Explanatory note — upper right
+  ctx.textAlign = 'right';
+  ctx.font = '12px -apple-system, sans-serif';
+  ctx.fillStyle = '#6e7681';
+  const nx = pad.l + pw - 4;
+  const ny = pad.t + 4;
+  ctx.fillText('In 1933, Eindhoven listeners heard Luxembourg\u2019s', nx, ny);
+  ctx.fillText('audio faintly superimposed on Berom\u00FCnster. Here,', nx, ny + 15);
+  ctx.fillText('each station broadcasts a fixed tone (' + fmtSI(state.luxTone, 'Hz') + ' / ' + fmtSI(state.berTone, 'Hz') + ')', nx, ny + 30);
+  ctx.fillText('to show the unwanted blue sidebands on the green carrier.', nx, ny + 45);
+
+  // dB axis labels
+  ctx.font = '11px -apple-system, sans-serif';
+  ctx.textAlign = 'right';
+  for (let db = dbFloor; db <= dbMax; db += 10) {
+    const y = dbToY(db);
+    // Skip labels in the legend region at the very top
+    if (y < pad.t + 5) continue;
+    ctx.fillStyle = db === 0 ? '#c9d1d9' : '#8b949e';
+    ctx.fillText(db + ' dB', pad.l - 5, y + 4);
+  }
+}
+
+// ==================== FREQ RESPONSE RENDERER ====================
+function renderFreqResponse() {
+  const { ctx } = canvases['c-freqresp'];
+  const { w, h } = resizeCanvas('c-freqresp');
+  ctx.clearRect(0, 0, w, h);
+
+  const pad = { l: 50, r: 20, t: 15, b: 30 };
+  const pw = w - pad.l - pad.r;
+  const ph = h - pad.t - pad.b;
+
+  const fMin = 10, fMax = 10000;
+  const logMin = Math.log10(fMin), logMax = Math.log10(fMax);
+  const dbMin = -40, dbMax = 3;
+
+  // Grid
+  ctx.strokeStyle = '#21262d';
+  ctx.lineWidth = 0.5;
+  for (const f of [10, 20, 50, 100, 200, 500, 1000, 2000, 5000, 10000]) {
+    const x = pad.l + (Math.log10(f) - logMin) / (logMax - logMin) * pw;
+    ctx.beginPath(); ctx.moveTo(x, pad.t); ctx.lineTo(x, pad.t + ph); ctx.stroke();
+  }
+  for (let db = dbMin; db <= dbMax; db += 10) {
+    const y = pad.t + (dbMax - db) / (dbMax - dbMin) * ph;
+    ctx.beginPath(); ctx.moveTo(pad.l, y); ctx.lineTo(pad.l + pw, y); ctx.stroke();
+  }
+
+  // -3 dB line
+  ctx.strokeStyle = 'rgba(247,120,186,0.4)';
+  ctx.lineWidth = 1;
+  ctx.setLineDash([6, 4]);
+  const y3db = pad.t + (dbMax - (-3)) / (dbMax - dbMin) * ph;
+  ctx.beginPath(); ctx.moveTo(pad.l, y3db); ctx.lineTo(pad.l + pw, y3db); ctx.stroke();
+  ctx.setLineDash([]);
+
+  // Transfer function
+  const nPts = 300;
+  ctx.strokeStyle = '#f778ba';
+  ctx.lineWidth = 2.5;
+  ctx.beginPath();
+  for (let i = 0; i < nPts; i++) {
+    const logf = logMin + (logMax - logMin) * i / (nPts - 1);
+    const f = Math.pow(10, logf);
+    const Omega = 2 * Math.PI * f;
+    const H = 1 / Math.sqrt(1 + Omega * Omega * state.tau * state.tau);
+    const db = 20 * Math.log10(H);
+    const x = pad.l + (logf - logMin) / (logMax - logMin) * pw;
+    const y = pad.t + (dbMax - db) / (dbMax - dbMin) * ph;
+    const yc = Math.max(pad.t, Math.min(pad.t + ph, y));
+    if (i === 0) ctx.moveTo(x, yc); else ctx.lineTo(x, yc);
+  }
+  ctx.stroke();
+
+  // f_3dB marker
+  if (state.f3dB >= fMin && state.f3dB <= fMax) {
+    const x3 = pad.l + (Math.log10(state.f3dB) - logMin) / (logMax - logMin) * pw;
+    ctx.strokeStyle = 'rgba(247,120,186,0.6)';
+    ctx.lineWidth = 1;
+    ctx.setLineDash([3, 3]);
+    ctx.beginPath(); ctx.moveTo(x3, pad.t); ctx.lineTo(x3, pad.t + ph); ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.fillStyle = '#f778ba';
+    ctx.font = '10px -apple-system, sans-serif';
+    ctx.textAlign = 'left';
+    ctx.fillText('f\u2083\u209B = ' + fmtSI(state.f3dB, 'Hz'), x3 + 4, pad.t + 12);
+  }
+
+  // Luxembourg tone marker
+  if (state.luxTone >= fMin && state.luxTone <= fMax) {
+    const xc = pad.l + (Math.log10(state.luxTone) - logMin) / (logMax - logMin) * pw;
+    const Omega = 2 * Math.PI * state.luxTone;
+    const Hc = 1 / Math.sqrt(1 + Omega * Omega * state.tau * state.tau);
+    const dbc = 20 * Math.log10(Hc);
+    const yc = pad.t + (dbMax - dbc) / (dbMax - dbMin) * ph;
+    ctx.fillStyle = '#58a6ff';
+    ctx.beginPath(); ctx.arc(xc, yc, 5, 0, 2 * Math.PI); ctx.fill();
+    ctx.fillStyle = '#fff';
+    ctx.beginPath(); ctx.arc(xc, yc, 2, 0, 2 * Math.PI); ctx.fill();
+    ctx.fillStyle = '#58a6ff';
+    ctx.font = '9px -apple-system, sans-serif';
+    ctx.textAlign = 'left';
+    ctx.fillText('Lux ' + fmtSI(state.luxTone, 'Hz'), xc + 8, yc - 2);
+  }
+
+  // Beromunster tone marker
+  if (state.berTone >= fMin && state.berTone <= fMax) {
+    const xc = pad.l + (Math.log10(state.berTone) - logMin) / (logMax - logMin) * pw;
+    const Omega = 2 * Math.PI * state.berTone;
+    const Hc = 1 / Math.sqrt(1 + Omega * Omega * state.tau * state.tau);
+    const dbc = 20 * Math.log10(Hc);
+    const yc = pad.t + (dbMax - dbc) / (dbMax - dbMin) * ph;
+    ctx.fillStyle = '#3fb950';
+    ctx.beginPath(); ctx.arc(xc, yc, 5, 0, 2 * Math.PI); ctx.fill();
+    ctx.fillStyle = '#fff';
+    ctx.beginPath(); ctx.arc(xc, yc, 2, 0, 2 * Math.PI); ctx.fill();
+    ctx.fillStyle = '#3fb950';
+    ctx.font = '9px -apple-system, sans-serif';
+    ctx.textAlign = 'left';
+    ctx.fillText('Ber ' + fmtSI(state.berTone, 'Hz'), xc + 8, yc + 4);
+  }
+
+  // Axis labels
+  ctx.fillStyle = '#8b949e';
+  ctx.font = '10px -apple-system, sans-serif';
+  ctx.textAlign = 'center';
+  for (const f of [10, 100, 1000, 10000]) {
+    const x = pad.l + (Math.log10(f) - logMin) / (logMax - logMin) * pw;
+    ctx.fillText(fmtSI(f, 'Hz'), x, pad.t + ph + 15);
+  }
+  ctx.textAlign = 'right';
+  for (let db = dbMin; db <= dbMax; db += 10) {
+    const y = pad.t + (dbMax - db) / (dbMax - dbMin) * ph;
+    ctx.fillText(db + ' dB', pad.l - 5, y + 3);
+  }
+  ctx.textAlign = 'left';
+  drawAxisLabel(ctx, 'Audio Modulation Frequency \u2192', pad.l + pw / 2 - 70, pad.t + ph + 26);
+}
+
+// ==================== ANIMATION ====================
+let needsRedraw = true;
+
+function render() {
+  if (needsRedraw) {
+    renderMap();
+    renderSpectrum();
+    renderFreqResponse();
+    needsRedraw = false;
+  }
+  requestAnimationFrame(render);
+}
+
+// ==================== AUDIO (continuous, real-time) ====================
+let audioCtx = null;
+let audioPlaying = false;
+let audioNodes = null;
+let audioPhase = { carrier: 0, ber: 0, lux: 0 };
+
+function toggleAudio() {
+  const btn = document.getElementById('btn-audio');
+  if (audioPlaying) {
+    stopAudio();
+    return;
+  }
+  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  if (audioCtx.state === 'suspended') audioCtx.resume();
+
+  const gainNode = audioCtx.createGain();
+  gainNode.gain.value = 0;
+  gainNode.connect(audioCtx.destination);
+  // Fade in
+  gainNode.gain.linearRampToValueAtTime(0.25, audioCtx.currentTime + 0.05);
+
+  const bufSize = 2048;
+  const processor = audioCtx.createScriptProcessor(bufSize, 0, 1);
+  const sr = audioCtx.sampleRate;
+
+  processor.onaudioprocess = function(e) {
+    const out = e.outputBuffer.getChannelData(0);
+    const fCarrier = 600; // audible stand-in for RF carrier
+    const mwExag = Math.min(state.mwLux * 200, 0.6);
+    const norm = 1 + state.berMod + mwExag;
+    const omBer = 2 * Math.PI * state.berTone / sr;
+    const omLux = 2 * Math.PI * state.luxTone / sr;
+    const omCar = 2 * Math.PI * fCarrier / sr;
+
+    for (let i = 0; i < bufSize; i++) {
+      const env = 1 + state.berMod * Math.cos(audioPhase.ber) +
+                      mwExag * Math.cos(audioPhase.lux - state.phiLux);
+      out[i] = (env / norm) * Math.sin(audioPhase.carrier);
+      audioPhase.carrier += omCar;
+      audioPhase.ber += omBer;
+      audioPhase.lux += omLux;
+    }
+    // Keep phases from growing unbounded
+    const TWO_PI = 2 * Math.PI;
+    audioPhase.carrier %= TWO_PI;
+    audioPhase.ber %= TWO_PI;
+    audioPhase.lux %= TWO_PI;
+  };
+
+  processor.connect(gainNode);
+  audioNodes = { processor, gainNode };
+  audioPlaying = true;
+  btn.textContent = '\u23f9 Stop';
+  btn.classList.add('playing');
+}
+
+function stopAudio() {
+  const btn = document.getElementById('btn-audio');
+  if (audioNodes) {
+    // Fade out to avoid click
+    audioNodes.gainNode.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 0.05);
+    setTimeout(() => {
+      audioNodes.processor.disconnect();
+      audioNodes.gainNode.disconnect();
+      audioNodes = null;
+    }, 80);
+  }
+  audioPlaying = false;
+  audioPhase = { carrier: 0, ber: 0, lux: 0 };
+  btn.textContent = '\ud83d\udd0a Listen';
+  btn.classList.remove('playing');
+}
+
+// ==================== RESTORE DEFAULTS ====================
+const defaults = { luxP: 150e3, luxTone: 400, luxMod: 0.8, berP: 60e3, berTone: 1000, berMod: 0.8, nu0: 1e6, ne: 1e10 };
+
+function restoreDefaults() {
+  for (const [id, def] of Object.entries(sliders)) {
+    const v = defaults[def.key];
+    if (v !== undefined) {
+      def.set(v);
+      def.apply(v);
+      valEls[id].textContent = def.fmt(v);
+    }
+  }
+  recompute();
+  updateDerived();
+  needsRedraw = true;
+}
+
+// ==================== ABOUT DIALOG ====================
+function toggleAbout() {
+  const el = document.getElementById('about-overlay');
+  el.style.display = el.style.display === 'none' ? 'flex' : 'none';
+}
+
+// ==================== INFO POPUPS ====================
+let activePopup = null;
+
+function showInfoPopup(icon) {
+  dismissPopup();
+  const text = icon.getAttribute('data-info');
+  const rect = icon.getBoundingClientRect();
+  const popup = document.createElement('div');
+  popup.className = 'info-popup';
+  popup.textContent = text;
+  document.body.appendChild(popup);
+
+  // Position below the icon
+  let left = rect.left;
+  let top = rect.bottom + 8;
+  // Keep within viewport
+  const pw = 320;
+  if (left + pw > window.innerWidth - 10) left = window.innerWidth - pw - 10;
+  if (left < 10) left = 10;
+  if (top + 100 > window.innerHeight) top = rect.top - 60;
+  popup.style.left = left + 'px';
+  popup.style.top = top + 'px';
+  activePopup = popup;
+}
+
+function dismissPopup() {
+  if (activePopup) {
+    activePopup.remove();
+    activePopup = null;
+  }
+}
+
+document.addEventListener('click', (e) => {
+  if (e.target.classList.contains('info-icon')) {
+    e.stopPropagation();
+    showInfoPopup(e.target);
+  } else {
+    dismissPopup();
+  }
+});
+
+// ==================== INIT ====================
+window.addEventListener('DOMContentLoaded', () => {
+  initSliders();
+  setupCanvas('c-map');
+  setupCanvas('c-spectrum');
+  setupCanvas('c-freqresp');
+  recompute();
+  updateDerived();
+  needsRedraw = true;
+  requestAnimationFrame(render);
+});
+
+window.addEventListener('resize', () => { needsRedraw = true; });
+</script>
+</body>
+</html>

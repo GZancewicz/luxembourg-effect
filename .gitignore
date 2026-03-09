@@ -1,0 +1,10 @@
+# LaTeX auxiliary files
+*.aux
+*.log
+*.out
+*.synctex.gz
+*.fls
+*.fdb_latexmk
+
+# Claude Code
+.claude/
