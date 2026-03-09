@@ -1034,16 +1034,21 @@ function toggleAudio() {
   processor.onaudioprocess = function(e) {
     const out = e.outputBuffer.getChannelData(0);
     const fCarrier = 600; // audible stand-in for RF carrier
+    // Scale overall level with Beromünster power (dB relative to default 60 kW)
+    const berGain = Math.sqrt(state.berP / 60e3);  // amplitude ~ sqrt(power)
+    const vol = Math.min(berGain, 3.0);  // cap to avoid clipping
+    // Luxembourg cross-mod: exaggerate for audibility but scale with actual mwLux
     const mwExag = Math.min(state.mwLux * 200, 0.6);
-    const norm = 1 + state.berMod + mwExag;
     const omBer = 2 * Math.PI * state.berTone / sr;
     const omLux = 2 * Math.PI * state.luxTone / sr;
     const omCar = 2 * Math.PI * fCarrier / sr;
 
     for (let i = 0; i < bufSize; i++) {
+      // AM envelope: carrier (1) + Beromünster tone + Luxembourg cross-mod tone
       const env = 1 + state.berMod * Math.cos(audioPhase.ber) +
                       mwExag * Math.cos(audioPhase.lux - state.phiLux);
-      out[i] = (env / norm) * Math.sin(audioPhase.carrier);
+      // Normalize by max possible peak (1 + 1 + 0.6) to prevent clipping, then scale by vol
+      out[i] = vol * (env / 2.6) * Math.sin(audioPhase.carrier);
       audioPhase.carrier += omCar;
       audioPhase.ber += omBer;
       audioPhase.lux += omLux;
