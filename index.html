@@ -828,8 +828,7 @@ function renderSpectrum() {
   drawLabel(fc - state.berTone, berSBdb, '\u2212' + fmtSI(state.berTone, 'Hz'), '#3fb950', -8);
 
   // Luxembourg's cross-modulated sidebands at fc +/- luxTone
-  // Use raw (unclamped) value so dB level responds to power changes
-  const luxSBdb = state.mwLuxRaw > 0 ? berCarrierDb + 20 * Math.log10(state.mwLuxRaw / 2) : dbFloor;
+  const luxSBdb = state.mwLux > 0 ? berCarrierDb + 20 * Math.log10(state.mwLux / 2) : dbFloor;
   drawSpike(fc + state.luxTone, luxSBdb, '#58a6ff', 2);
   drawSpike(fc - state.luxTone, luxSBdb, '#58a6ff', 2);
   drawLabel(fc + state.luxTone, luxSBdb, '+' + fmtSI(state.luxTone, 'Hz'), '#58a6ff', -8);
@@ -1037,8 +1036,8 @@ function toggleAudio() {
     // Scale overall level with Beromünster power (dB relative to default 60 kW)
     const berGain = Math.sqrt(state.berP / 60e3);  // amplitude ~ sqrt(power)
     const vol = Math.min(berGain, 3.0);  // cap to avoid clipping
-    // Luxembourg cross-mod: exaggerate for audibility but scale with actual mwLuxRaw
-    const mwExag = Math.min(state.mwLuxRaw * 200, 0.6);
+    // Luxembourg cross-mod: scale with clamped mwLux for consistency with spectrum
+    const mwExag = 0.8 * Math.tanh(state.mwLux * 3);
     const omBer = 2 * Math.PI * state.berTone / sr;
     const omLux = 2 * Math.PI * state.luxTone / sr;
     const omCar = 2 * Math.PI * fCarrier / sr;
@@ -1047,8 +1046,8 @@ function toggleAudio() {
       // AM envelope: carrier (1) + Beromünster tone + Luxembourg cross-mod tone
       const env = 1 + state.berMod * Math.cos(audioPhase.ber) +
                       mwExag * Math.cos(audioPhase.lux - state.phiLux);
-      // Normalize by max possible peak (1 + 1 + 0.6) to prevent clipping, then scale by vol
-      out[i] = vol * (env / 2.6) * Math.sin(audioPhase.carrier);
+      // Normalize by max possible peak (1 + 1 + 0.8) to prevent clipping, then scale by vol
+      out[i] = vol * (env / 2.8) * Math.sin(audioPhase.carrier);
       audioPhase.carrier += omCar;
       audioPhase.ber += omBer;
       audioPhase.lux += omLux;
