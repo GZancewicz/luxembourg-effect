@@ -2,7 +2,7 @@
 index.html linguist-language=JavaScript
 
 # Ensure TeX is shown in language stats
-*.tex linguist-detectable
+*.tex linguist-detectable=true linguist-language=TeX
 
 # Mark build artifacts as generated
 *.aux linguist-generated
