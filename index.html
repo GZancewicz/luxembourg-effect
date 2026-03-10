@@ -361,7 +361,7 @@ footer a { color: var(--accent); text-decoration: none; }
   </div>
   <div class="slider-group">
     <label><span class="name">Audio Tone <span class="info-icon" data-info="Audio frequency being broadcast by Radio Luxembourg. This tone gets transferred onto Berom&uuml;nster's signal via cross-modulation in the ionosphere.">i</span></span><span class="val" id="v-luxTone"></span></label>
-    <input type="range" id="s-luxTone" min="0" max="1000" value="500">
+    <input type="range" id="s-luxTone" min="0" max="1000" value="452">
   </div>
   <div class="slider-group">
     <label><span class="name">Modulation Depth <span class="info-icon" data-info="Depth of amplitude modulation on Luxembourg's carrier. A higher modulation depth means stronger heating variations in the ionosphere, producing more cross-modulation.">i</span></span><span class="val" id="v-luxMod"></span></label>
@@ -376,7 +376,7 @@ footer a { color: var(--accent); text-decoration: none; }
   </div>
   <div class="slider-group">
     <label><span class="name">Audio Tone <span class="info-icon" data-info="Audio frequency being broadcast by Berom&uuml;nster. This is the station's own programming. In the spectrum, these sidebands appear in green.">i</span></span><span class="val" id="v-berTone"></span></label>
-    <input type="range" id="s-berTone" min="0" max="1000" value="700">
+    <input type="range" id="s-berTone" min="0" max="1000" value="651">
   </div>
   <div class="slider-group">
     <label><span class="name">Modulation Depth <span class="info-icon" data-info="Depth of amplitude modulation on Berom&uuml;nster's carrier. Sets the level of Berom&uuml;nster's own sidebands relative to its carrier.">i</span></span><span class="val" id="v-berMod"></span></label>
@@ -389,8 +389,8 @@ footer a { color: var(--accent); text-decoration: none; }
     <input type="range" id="s-nu" min="0" max="1000" value="667">
   </div>
   <div class="slider-group">
-    <label><span class="name">Electron Density n<sub>e</sub> <span class="info-icon" data-info="Number of free electrons per cubic meter in the ionospheric D/E layer. Higher electron density increases the plasma frequency and absorption coefficient, strengthening the cross-modulation effect.">i</span></span><span class="val" id="v-ne"></span></label>
-    <input type="range" id="s-ne" min="0" max="1000" value="667">
+    <label><span class="name">Electron Density n<sub>e</sub> <span class="info-icon" data-info="Number of free electrons per cubic meter in the ionospheric D layer where cross-modulation occurs (~70–90 km). Typical daytime D-region values are 10⁸–10⁹ m⁻³. Higher electron density increases the plasma frequency and absorption coefficient, strengthening the cross-modulation effect.">i</span></span><span class="val" id="v-ne"></span></label>
+    <input type="range" id="s-ne" min="0" max="1000" value="400">
   </div>
 
   <div style="margin-top:0.75rem">
@@ -422,7 +422,7 @@ footer a { color: var(--accent); text-decoration: none; }
     <canvas id="c-spectrum"></canvas>
   </div>
   <div class="canvas-panel">
-    <h3 title="How efficiently Luxembourg's audio modulation transfers onto Berom&#xFC;nster's signal via the ionosphere. The ionosphere acts as a low-pass filter &#x2014; low audio frequencies transfer well, high frequencies are attenuated. The &#x2212;3 dB point is set by the electron thermal relaxation time &#x03C4;."><span class="dot" style="background:var(--orange)"></span>Modulation Transfer Function (Luxembourg &rarr; Berom&uuml;nster) <span style="color:var(--text-dim);font-size:0.7rem;cursor:help">&#9432;</span></h3>
+    <h3><span class="dot" style="background:var(--orange)"></span>Modulation Transfer Function (Luxembourg &rarr; Berom&uuml;nster) <span class="info-icon" data-info="How efficiently Luxembourg's audio modulation transfers onto Beromünster's signal via the ionosphere. The ionosphere acts as a low-pass filter — low audio frequencies transfer well, high frequencies are attenuated. The −3 dB point is set by the electron thermal relaxation time τ.">i</span></h3>
     <canvas id="c-freqresp"></canvas>
   </div>
 </section>
@@ -464,7 +464,7 @@ const state = {
   berMod: 0.8,
   // Ionosphere
   nu0: 1e6,
-  ne: 1e10,
+  ne: 1e8,
   // Fixed carrier freqs (historical)
   fd: 230e3,         // Luxembourg carrier
   fw: 652e3,         // Beromunster carrier
@@ -539,7 +539,7 @@ const sliders = {
     apply(v) { state.berMod = v; }, fmt(v) { return (v * 100).toFixed(0) + '%'; }, key: 'berMod' },
   's-nu':      { get() { return logMap(this.el.value, 4, 7); }, set(v) { this.el.value = logUnmap(v, 4, 7); },
     apply(v) { state.nu0 = v; }, fmt(v) { return fmtSI(v, 's\u207B\u00B9'); }, key: 'nu0' },
-  's-ne':      { get() { return logMap(this.el.value, 8, 11); }, set(v) { this.el.value = logUnmap(v, 8, 11); },
+  's-ne':      { get() { return logMap(this.el.value, 6, 11); }, set(v) { this.el.value = logUnmap(v, 6, 11); },
     apply(v) { state.ne = v; }, fmt(v) { return fmtSI(v, 'm\u207B\u00B3'); }, key: 'ne' },
 };
 
@@ -1037,8 +1037,8 @@ function toggleAudio() {
     // Scale overall level with Beromünster power (dB relative to default 60 kW)
     const berGain = Math.sqrt(state.berP / 60e3);  // amplitude ~ sqrt(power)
     const vol = Math.min(berGain, 3.0);  // cap to avoid clipping
-    // Luxembourg cross-mod: exaggerate for audibility but scale with actual mwLux
-    const mwExag = Math.min(state.mwLux * 200, 0.6);
+    // Luxembourg cross-mod: exaggerate for audibility but scale with actual mwLuxRaw
+    const mwExag = Math.min(state.mwLuxRaw * 200, 0.6);
     const omBer = 2 * Math.PI * state.berTone / sr;
     const omLux = 2 * Math.PI * state.luxTone / sr;
     const omCar = 2 * Math.PI * fCarrier / sr;
@@ -1085,7 +1085,7 @@ function stopAudio() {
 }
 
 // ==================== RESTORE DEFAULTS ====================
-const defaults = { luxP: 150e3, luxTone: 400, luxMod: 0.8, berP: 60e3, berTone: 1000, berMod: 0.8, nu0: 1e6, ne: 1e10 };
+const defaults = { luxP: 150e3, luxTone: 400, luxMod: 0.8, berP: 60e3, berTone: 1000, berMod: 0.8, nu0: 1e6, ne: 1e8 };
 
 function restoreDefaults() {
   for (const [id, def] of Object.entries(sliders)) {
