@@ -1,6 +1,9 @@
 # Surface JavaScript in GitHub language stats
 index.html linguist-language=JavaScript
 
+# Ensure TeX is shown in language stats
+*.tex linguist-detectable
+
 # Mark build artifacts as generated
 *.aux linguist-generated
 *.log linguist-generated
