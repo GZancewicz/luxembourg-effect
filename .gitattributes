@@ -1,8 +1,7 @@
 # Surface JavaScript in GitHub language stats
 index.html linguist-language=JavaScript
 
-# Mark TeX files and build artifacts as non-language (text)
-*.tex linguist-vendored
+# Mark build artifacts as generated
 *.aux linguist-generated
 *.log linguist-generated
 *.out linguist-generated
