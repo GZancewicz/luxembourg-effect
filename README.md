@@ -4,7 +4,7 @@ An interactive simulator and companion paper exploring **ionospheric cross-modul
 
 First observed by B. D. H. Tellegen in Eindhoven on April 10, 1933, when listeners tuned to Beromünster (652 kHz, Switzerland) heard Radio Luxembourg's (230 kHz) program content faintly superimposed on the signal. The ionosphere was acting as a nonlinear mixer.
 
-**[Launch the simulator](https://gregzancewicz.github.io/luxembourg-effect/)** · **[Read the paper (PDF)](https://gregzancewicz.github.io/luxembourg-effect/luxembourg_effect.pdf)**
+**[Launch the simulator](https://gregzancewicz.github.io/luxembourg-effect/)** · **[Read the paper (PDF)](https://github.com/GZancewicz/luxembourg-effect/blob/main/luxembourg_effect.pdf)**
 
 ---
 
