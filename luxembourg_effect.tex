@@ -358,32 +358,33 @@ where the \emph{absorption coefficient} (field amplitude attenuation per unit le
   \label{eq:kappa_def}
 \end{equation}
 
-To obtain an explicit expression for $\kappa$, we evaluate the imaginary part of $n$ from
-Eq.~\eqref{eq:refindex}.  In the regime relevant to the Luxembourg effect---radio waves
-well below the plasma frequency ceiling, propagating in the absorbing D and E layers where
-$\nu$ is significant but $\omega_p^2/\omega^2 < 1$---we write
+To evaluate $\chi$, rationalize Eq.~\eqref{eq:refindex} in the regime relevant to the
+Luxembourg effect---radio waves in the absorbing D and E layers, where $\nu$ is appreciable
+but $X = \omega_p^2/\omega^2 < 1$:
 \begin{equation}
-  n^2 = 1 - \frac{\omega_p^2(\omega - i\nu)}{\omega(\omega^2 + \nu^2)}.
+  n^2 = 1 - \frac{\omega_p^2\,(\omega - i\nu)}{\omega\,(\omega^2 + \nu^2)},
+  \qquad\text{so}\qquad
+  \operatorname{Im}(n^2) = \frac{\omega_p^2\,\nu}{\omega\,(\omega^2+\nu^2)}.
 \end{equation}
-The imaginary part of $n^2$ is
-\begin{equation}
-  \operatorname{Im}(n^2) = \frac{\omega_p^2\,\nu}{\omega(\omega^2+\nu^2)}.
-\end{equation}
-For weak absorption ($\chi \ll \mu$), we have $\operatorname{Im}(n^2) \approx 2\mu\chi$,
-giving
-\begin{equation}
-  \chi \approx \frac{\omega_p^2\,\nu}{2\mu\,\omega(\omega^2 + \nu^2)},
-\end{equation}
-and hence the absorption coefficient
+Writing $n^2 = (\mu+i\chi)^2$ gives $\operatorname{Im}(n^2) = 2\mu\chi$ exactly, so for
+weak absorption ($\chi \ll \mu$) we may solve for $\chi$ and insert it into
+Eq.~\eqref{eq:kappa_def} to obtain
 \begin{equation}
   \boxed{
-  \kappa = \frac{\omega_p^2\,\nu}{2\mu\,c\,(\omega^2 + \nu^2)}.
+  \kappa = \frac{\omega_p^2\,\nu}{2\,\mu\,c\,(\omega^2 + \nu^2)}
+         = \frac{n_e e^2}{2\,\mu\,c\,\varepsilon_0 m_e}\,
+           \frac{\nu}{\omega^2+\nu^2}.
   }
   \label{eq:kappa}
 \end{equation}
-This is the central quantity in the theory of the Luxembourg effect.  Note that $\kappa$
-depends on the collision frequency $\nu$, which we will show is modulated by the strong
-disturbing wave through electron heating.
+This is the central quantity of the theory, and its structure already contains the whole
+effect in outline.  Two features matter.  First, $\kappa$ is proportional to the electron
+density and, for $\omega \gg \nu$, falls as $\omega^{-2}$: low-frequency signals are
+absorbed most strongly.  Second---and this is the point on which everything turns---$\kappa$
+depends on the collision frequency $\nu$, a property not of the wave but of the
+\emph{medium}.  Anything that changes $\nu$ changes the absorption seen by every wave in the
+region.  The remainder of the derivation shows that a sufficiently powerful wave does
+exactly that, by heating the electrons.
 
 For a signal traversing a path $\mathcal{P}$ through the ionosphere, the total field
 amplitude attenuation is
@@ -434,34 +435,50 @@ electron.  The product $\nu\delta$ is the effective energy-loss collision freque
 
 \subsubsection{The Energy Balance Equation}
 
-The rate of change of electron thermal energy per unit volume is the difference between
-heating and cooling:
+Equating the rate of change of electron thermal energy per unit volume to the difference
+between heating \eqref{eq:Qrf} and cooling \eqref{eq:Qloss},
 \begin{equation}
-  \boxed{
-  \frac{3}{2}\,n_e\,k_B\,\frac{dT_e}{dt} = Q_{\rm RF} - Q_{\rm loss}
-  = \frac{n_e e^2\nu\,E_d^2}{2m_e(\omega_d^2+\nu^2)}
-    - 3\,n_e\,\nu\,\delta\,k_B(T_e - T_n)\,\frac{1}{2}.
-  }
+  \frac{3}{2}\,n_e\,k_B\,\frac{dT_e}{dt} = Q_{\rm RF} - Q_{\rm loss},
   \label{eq:energy_balance}
 \end{equation}
-Simplifying with $G = e^2/(2m_e(\omega_d^2+\nu^2))$ for the heating coefficient and
-defining $L = \nu\delta$ as the effective cooling rate, we can write
+and dividing through by $\tfrac{3}{2}n_ek_B$, the common factor $n_e$ cancels and the
+balance collapses to a single relaxation equation for the electron temperature:
 \begin{equation}
-  \frac{dT_e}{dt} = \frac{\nu\,G\,E_d^2}{3k_B/2}
-    - 2L\,(T_e - T_n).
+  \boxed{
+  \frac{dT_e}{dt} = -\,\nu\delta\,(T_e - T_n)
+    \;+\; \frac{e^2\,\nu\,E_d^2}{3\,m_e\,k_B\,(\omega_d^2+\nu^2)}.
+  }
   \label{eq:energy_simplified}
 \end{equation}
+The structure is transparent: the electron temperature relaxes towards the neutral
+temperature at rate $\nu\delta$, and is driven away from it by the wave at a rate
+proportional to $E_d^2$.  Every subsequent result follows from this one equation.
 
-In steady state ($dT_e/dt = 0$) with no disturbing wave ($E_d = 0$), we have $T_e = T_n$:
-the electrons are in thermal equilibrium with the neutrals.  The \emph{relaxation time} for
-the electron temperature to return to equilibrium after a perturbation is
+With no disturbing wave ($E_d = 0$) the steady state is $T_e = T_n$: the electrons sit in
+thermal equilibrium with the neutrals.  The coefficient of the restoring term defines the
+\emph{electron energy relaxation time}
 \begin{equation}
-  \tau = \frac{1}{2L} = \frac{1}{2\nu\delta} = \frac{M}{4m_e\nu}.
+  \tau = \frac{1}{\nu\delta} = \frac{M}{2\,m_e\,\nu},
   \label{eq:tau}
 \end{equation}
-For the lower ionosphere (D and E layers), typical values are $\nu \sim 10^5$--$10^6$~s$^{-1}$
-and $\delta \sim 10^{-3}$, giving $\tau \sim 0.5$--5~ms.  This relaxation time plays a
-critical role in determining the frequency response of the cross-modulation effect.
+the last form following from $\delta = 2m_e/M$.  For the lower ionosphere (D and E layers),
+typical values $\nu \sim 10^5$--$10^6$~s$^{-1}$ and $\delta \sim 10^{-3}$ give
+$\tau \sim 1$--10~ms.  This single timescale governs the frequency response of the
+cross-modulation effect.
+
+Written in terms of $\tau$, and abbreviating the heating term by the temperature increment
+it would produce in steady state, Eq.~\eqref{eq:energy_simplified} takes the canonical
+first-order form
+\begin{equation}
+  \tau\,\frac{dT_e}{dt} + (T_e - T_n) = \Theta\,E_d^2,
+  \qquad
+  \Theta \equiv \frac{e^2\,\tau\,\nu}{3\,m_e\,k_B\,(\omega_d^2+\nu^2)}
+        = \frac{e^2}{3\,m_e\,k_B\,\delta\,(\omega_d^2+\nu^2)},
+  \label{eq:energy_canonical}
+\end{equation}
+where the \emph{heating susceptibility} $\Theta$ measures the electron temperature rise per
+unit squared field.  Note that $\nu$ has cancelled from $\Theta$ entirely: the heating and
+the cooling are both collisional, and their ratio is set by $\delta$ alone.
 
 \subsection{Temperature Dependence of the Collision Frequency}
 \label{sec:nu_T}
@@ -520,126 +537,141 @@ The disturbing wave (Radio Luxembourg) is amplitude-modulated:
 where $E_0$ is the carrier amplitude, $m$ is the modulation depth ($0 \le m \le 1$), and
 $\Omega$ is the audio modulation frequency ($\Omega \ll \omega_d$).
 
-The time-averaged power (over many RF cycles, but slow compared to $\Omega$) is
-proportional to the square of the envelope:
+Averaging over many RF cycles---fast compared with $\Omega^{-1}$, so the envelope is
+held fixed---the driving term of Eq.~\eqref{eq:energy_canonical} is
 \begin{equation}
   \langle E_d^2 \rangle = \frac{E_0^2}{2}\bigl(1 + m\cos\Omega t\bigr)^2
-    \approx \frac{E_0^2}{2}\bigl(1 + 2m\cos\Omega t\bigr),
+    = \underbrace{\frac{E_0^2}{2}\Bigl(1 + \frac{m^2}{2}\Bigr)}_{\text{steady}}
+    \;+\; \underbrace{m\,E_0^2\cos\Omega t}_{\text{at }\Omega}
+    \;+\; \underbrace{\frac{m^2E_0^2}{4}\cos 2\Omega t}_{\text{at }2\Omega}.
   \label{eq:power_env}
 \end{equation}
-where we have dropped the $m^2\cos^2\Omega t$ term (valid for $m \ll 1$ or as a
-first-order approximation; the retained terms capture the dominant modulation transfer).
+The three terms are the only ones present: squaring a sinusoidal envelope generates a
+steady offset, a component at the modulation frequency, and a second harmonic.  Only the
+term at $\Omega$ carries the programme content onto the wanted signal, so we retain it and
+work to first order in $m$, dropping the $O(m^2)$ offset and second harmonic.
 
 \subsubsection{Electron Temperature Response}
 
-Substituting the modulated power into the linearized energy balance equation
-\eqref{eq:energy_simplified}, we seek a solution of the form $T_e(t) = T_0 +
-\Delta\overline{T} + \widetilde{T}(t)$, where $\Delta\overline{T}$ is the steady-state
-heating by the carrier and $\widetilde{T}(t)$ is the oscillating component at frequency
-$\Omega$.
+Equation~\eqref{eq:energy_canonical} is linear in $T_e$, so it responds to each term of
+\eqref{eq:power_env} independently.  Writing
+$T_e(t) = T_0 + \Delta\overline{T} + \widetilde{T}(t)$, the steady term drives the
+carrier heating $\Delta\overline{T}$ and the term at $\Omega$ drives the oscillation
+$\widetilde{T}(t)$.
 
-The steady-state heating gives
+Setting $dT_e/dt = 0$ against the steady part gives the carrier heating directly from the
+susceptibility $\Theta$:
 \begin{equation}
-  \Delta\overline{T} = \frac{\nu_0 G\,E_0^2}{2 \cdot 3k_B L}
-                     = \frac{e^2 E_0^2}{12\,m_e\,k_B\,\delta\,(\omega_d^2+\nu_0^2)}.
+  \Delta\overline{T} = \Theta\,\frac{E_0^2}{2}
+                     = \frac{e^2\,E_0^2}{6\,m_e\,k_B\,\delta\,(\omega_d^2+\nu_0^2)}.
   \label{eq:DT_steady}
 \end{equation}
+The inverse dependence on $\delta$ is the crux of the effect: because an electron surrenders
+only a fraction $\delta \sim 10^{-3}$ of its energy per collision, heat accumulates over
+many collisions and even a modest field produces a measurable temperature rise.
 
-For the oscillating component, the linearized energy equation gives
+The component at $\Omega$ obeys the same first-order equation with a harmonic drive,
 \begin{equation}
-  \frac{d\widetilde{T}}{dt} + \frac{\widetilde{T}}{\tau}
-    = \frac{2m\cos\Omega t}{\tau}\,\Delta\overline{T},
+  \tau\,\frac{d\widetilde{T}}{dt} + \widetilde{T} = 2\,\Delta\overline{T}\,m\cos\Omega t,
 \end{equation}
-which has the steady-state solution
+whose steady-state solution is
 \begin{equation}
   \widetilde{T}(t) = \frac{2m\,\Delta\overline{T}}{\sqrt{1+\Omega^2\tau^2}}
     \cos(\Omega t - \phi),
+  \qquad \phi = \arctan(\Omega\tau).
   \label{eq:T_osc}
 \end{equation}
-where $\phi = \arctan(\Omega\tau)$ is the phase lag.  This is the response of a
-\emph{first-order low-pass filter} with cutoff frequency $1/\tau$.  Audio modulation
-frequencies well below $1/\tau \sim 200$--2000~Hz are transferred efficiently; higher
-frequencies are attenuated.
+The electron gas therefore acts as a \emph{first-order low-pass filter} of the disturbing
+wave's envelope, with corner frequency $1/\tau$ and an accompanying phase lag $\phi$.
+Modulation frequencies well below $1/\tau$ are transferred faithfully; higher ones are
+attenuated and delayed.
 
 \subsubsection{Collision Frequency and Absorption Modulation}
 
-From the linearization \eqref{eq:nu_linear}, the oscillating part of the collision
-frequency is
+The physical chain is $T_e \to \nu \to \kappa$, and since each link has already been
+linearized it is cleanest to compose the two \emph{logarithmic} sensitivities.  The first,
+from Eq.~\eqref{eq:nu_linear}, is the definition of $\beta$:
 \begin{equation}
-  \widetilde{\nu}(t) = \nu_0\,\frac{\beta}{T_0}\,\widetilde{T}(t).
+  \frac{\widetilde{\nu}}{\nu_0} = \beta\,\frac{\widetilde{T}}{T_0}.
   \label{eq:nu_osc}
 \end{equation}
-
-The corresponding modulation of the absorption coefficient follows from
-Eq.~\eqref{eq:kappa}.  Differentiating $\kappa$ with respect to $\nu$ (at fixed $n_e$),
+For the second, differentiate the absorption coefficient \eqref{eq:kappa} logarithmically
+with respect to $\nu$ at fixed $n_e$, evaluated at the wanted signal's frequency
+$\omega_w$:
 \begin{equation}
-  \frac{\partial\kappa}{\partial\nu}
-    = \frac{\omega_p^2}{2\mu c}\,\frac{\omega_w^2 - \nu^2}{(\omega_w^2+\nu^2)^2},
+  \frac{\partial\ln\kappa}{\partial\ln\nu}
+    = \frac{\omega_w^2 - \nu^2}{\omega_w^2 + \nu^2}
+    \;\longrightarrow\; 1
+  \qquad (\omega_w \gg \nu),
   \label{eq:dkappa_dnu}
 \end{equation}
-where $\omega_w$ is the angular frequency of the wanted (weak) signal.  In the usual
-regime $\omega_w \gg \nu$ (radio frequencies well above the collision frequency), this
-simplifies to
+the limit holding for radio frequencies well above the collision frequency.  The sign of
+this factor is worth noting: absorption rises with $\nu$ only while $\omega_w > \nu$, and
+the effect would reverse in the opposite regime.
+
+Composing the two links, the fractional modulations simply multiply:
 \begin{equation}
-  \frac{\partial\kappa}{\partial\nu} \approx
-    \frac{\omega_p^2}{2\mu c\,\omega_w^2} = \frac{\kappa_0}{\nu_0},
-\end{equation}
-so that
-\begin{equation}
-  \widetilde{\kappa}(t) = \frac{\kappa_0}{\nu_0}\,\widetilde{\nu}(t)
-    = \kappa_0\,\frac{\beta}{T_0}\,\widetilde{T}(t).
+  \frac{\widetilde{\kappa}(t)}{\kappa_0}
+    = \frac{\widetilde{\nu}(t)}{\nu_0}
+    = \beta\,\frac{\widetilde{T}(t)}{T_0}.
   \label{eq:kappa_osc}
 \end{equation}
 
 \subsubsection{Cross-Modulation Integral}
 
-The wanted signal traverses a path $\mathcal{P}$ through the ionosphere, experiencing
-time-varying absorption.  From Eq.~\eqref{eq:path_atten}, the logarithmic amplitude
-change due to the perturbation is
+The wanted signal traverses a path $\mathcal{P}$ through the heated region, experiencing
+absorption that now varies in time.  From Eq.~\eqref{eq:path_atten}, the perturbation to
+its log-amplitude is the accumulated perturbation to the optical depth,
 \begin{equation}
-  \ln\frac{E_w(t)}{E_w^{(0)}} = -\int_{\mathcal{P}} \widetilde{\kappa}(s,t)\,ds,
+  \ln\frac{E_w(t)}{E_w^{(0)}} = -\int_{\mathcal{P}} \widetilde{\kappa}(s,t)\,ds ,
+  \label{eq:logamp}
 \end{equation}
-where $E_w^{(0)}$ is the unperturbed amplitude.  Substituting from
-Eqs.~\eqref{eq:kappa_osc} and~\eqref{eq:T_osc}:
+with $E_w^{(0)}$ the unperturbed amplitude.  Substituting $\widetilde{\kappa}$ from
+Eqs.~\eqref{eq:kappa_osc} and~\eqref{eq:T_osc}, the time dependence factors out of the
+integral entirely---it is the same $\cos(\Omega t - \phi)$ at every point of the path---
+leaving
 \begin{equation}
   \boxed{
-  \ln\frac{E_w(t)}{E_w^{(0)}} =
-    -\frac{2m\cos(\Omega t - \phi)}{\sqrt{1+\Omega^2\tau^2}}
-    \int_{\mathcal{P}}
-    \frac{\beta\,\kappa_0(s)\,\Delta\overline{T}(s)}{T_0(s)}\,ds.
+  \ln\frac{E_w(t)}{E_w^{(0)}} = -\,m_w\cos(\Omega t - \phi),
+  \qquad
+  m_w = \frac{2m}{\sqrt{1+\Omega^2\tau^2}}\;\mathcal{I},
+  \qquad
+  \mathcal{I} \equiv \int_{\mathcal{P}}
+    \beta\,\kappa_0(s)\,\frac{\Delta\overline{T}(s)}{T_0(s)}\,ds .
   }
   \label{eq:crossmod}
 \end{equation}
-
-This is the \emph{cross-modulation transfer integral}---the central result of the theory.
-For small modulation transfer (the typical case), we can write $E_w(t) \approx
-E_w^{(0)}(1 + m_w\cos(\Omega t - \phi))$, where the \emph{induced modulation depth} on the
-wanted signal is
+This is the \emph{cross-modulation transfer integral}, the central result of the theory.
+When the transfer is weak, $m_w \ll 1$, the exponential may be linearized,
 \begin{equation}
-  \boxed{
-  m_w = \frac{2m}{\sqrt{1+\Omega^2\tau^2}}
-    \int_{\mathcal{P}}
-    \frac{\beta\,\kappa_0(s)\,\Delta\overline{T}(s)}{T_0(s)}\,ds.
-  }
+  E_w(t) \approx E_w^{(0)}\bigl[1 - m_w\cos(\Omega t - \phi)\bigr],
   \label{eq:mw}
 \end{equation}
+so $m_w$ is precisely the \emph{induced modulation depth} impressed on the wanted signal:
+the quantity a listener in Eindhoven actually hears.  Its form separates cleanly into three
+factors---the disturbing wave's own modulation depth $2m$, an audio-frequency response
+$(1+\Omega^2\tau^2)^{-1/2}$ set by the electron gas, and a purely geometric path integral
+$\mathcal{I}$ carrying all the ionospheric structure.  The minus sign records that the
+transferred modulation is inverted: peaks of the disturbing programme heat the medium,
+raise the absorption, and thus dim the wanted signal.
 
 \subsubsection{Interpretation}
 
-Equation~\eqref{eq:mw} encodes all the essential physics of the Luxembourg effect:
+Equation~\eqref{eq:crossmod} encodes all the essential physics of the Luxembourg effect:
 
 \begin{enumerate}
-  \item \textbf{Proportionality to disturbing power.}  The steady-state temperature
-    perturbation $\Delta\overline{T} \propto E_0^2$ (Eq.~\ref{eq:DT_steady}), so $m_w
-    \propto E_0^2$---the induced modulation is proportional to the \emph{power} of the
-    disturbing transmitter.
+  \item \textbf{Proportionality to power.}  The carrier heating obeys
+    $\Delta\overline{T} \propto E_0^2$ (Eq.~\ref{eq:DT_steady}), so that
+    $m_w \propto E_0^2$: the induced modulation follows the \emph{power} of the
+    disturbing transmitter, not its field amplitude.  This is why the effect became
+    audible only for a transmitter of Radio Luxembourg's power.
 
-  \item \textbf{Low-pass filter character.}  The factor $1/\sqrt{1+\Omega^2\tau^2}$ shows
+  \item \textbf{Low-pass filter character.}  The factor $(1+\Omega^2\tau^2)^{-1/2}$ shows
     that modulation transfer is most efficient at low audio frequencies and rolls off above
-    $\Omega \sim 1/\tau$.  For $\tau \sim 1$~ms, the $-3$~dB point is at
-    $f \sim 160$~Hz.  This means bass frequencies are transferred more effectively than
-    treble---consistent with historical reports that the Luxembourg cross-modulation had a
-    characteristic ``muffled'' quality.
+    $\Omega \sim 1/\tau$.  For $\tau \sim 1$~ms, the $-3$~dB point falls at
+    $f = 1/(2\pi\tau) \sim 160$~Hz.  Bass frequencies are therefore transferred more
+    effectively than treble---consistent with historical reports that the Luxembourg
+    cross-modulation had a characteristic ``muffled'' quality.
 
   \item \textbf{Path integral over the interaction region.}  The integral over $\mathcal{P}$
     shows that cross-modulation accumulates along the entire path through the heated
@@ -647,12 +679,74 @@ Equation~\eqref{eq:mw} encodes all the essential physics of the Luxembourg effec
     $\kappa_0\,\Delta\overline{T}/T_0$ is largest---typically in the D and lower E layers
     where both the absorption and the heating are significant.
 
-  \item \textbf{The nonlinearity.}  The fundamental nonlinearity is the dependence of
-    $\kappa$ on $\nu$, which depends on $T_e$, which depends on $E_d^2$.  The absorption
-    coefficient is a nonlinear function of the total electromagnetic field present in the
-    medium.  This is the mechanism by which modulation is transferred between two signals at
-    entirely different carrier frequencies.
+  \item \textbf{The nonlinearity.}  The chain $\kappa \leftarrow \nu \leftarrow T_e
+    \leftarrow E_d^2$ makes the absorption coefficient a functional of the total field in the
+    medium.  Each link is individually linear; the nonlinearity enters solely through the
+    square of the field in the heating term.  This is how modulation crosses between two
+    signals whose carrier frequencies stand in no arithmetic relation to one another---no
+    sum or difference frequency is involved, only a shared dependence on the state of the
+    plasma.
 \end{enumerate}
+
+\subsection{Limits of Validity}
+\label{sec:validity}
+
+The boxed results \eqref{eq:energy_simplified}, \eqref{eq:DT_steady}
+and~\eqref{eq:crossmod} rest on two distinct smallness assumptions, which fail at different
+points and for different reasons.  It is worth separating them.
+
+\paragraph{The thermal condition $\Delta T_e \ll T_0$.}
+This is the load-bearing assumption.  It licenses the linearization of $\nu(T_e)$ in
+Eq.~\eqref{eq:nu_linear}, and with it the constancy of $\beta$, the constancy of $\tau$, and
+the linear relaxation form \eqref{eq:energy_canonical} on which everything downstream
+depends.  Its status is best judged from Eq.~\eqref{eq:DT_steady} directly.  Taking
+D-region values $\nu \sim 10^6$~s$^{-1}$, $\delta \sim 10^{-3}$ and $T_0 \sim 220$~K, and a
+disturbing field of a few tens of mV/m at 80~km---the order of magnitude produced by a
+150~kW longwave transmitter overhead---gives $\Delta\overline{T}/T_0$ of order a few tenths
+at the bottom of the layer, falling to a few percent higher up as the disturbing wave is
+itself absorbed.  The 1933 configuration therefore sat in a regime where first-order theory
+is a reasonable approximation, but not a comfortably asymptotic one; the margin is a factor
+of a few, not orders of magnitude.  The estimate is moreover sensitive to the poorly
+constrained loss fraction $\delta$, entering as $\Delta\overline{T} \propto \delta^{-1}$,
+and to $\nu$ through the resonant denominator---which at $f_d = 230$~kHz is \emph{not} in
+the $\omega_d \gg \nu$ limit, since $\nu \sim 10^6$~s$^{-1}$ is comparable to
+$\omega_d = 1.4\times10^6$~rad/s.  (The corresponding simplification made for the wanted
+wave in Eq.~\eqref{eq:dkappa_dnu} is unaffected, that wave being at 652~kHz with
+$\omega_w \gg \nu$ comfortably satisfied.)
+
+For modern high-power facilities the condition fails outright.  An effective radiated power
+in the gigawatt class delivers fields of order volts per metre to the D-region, for which
+Eq.~\eqref{eq:DT_steady} returns $\Delta\overline{T}$ exceeding $T_0$ itself.  The electron
+temperature is then multiplied rather than perturbed, $\beta$ must be carried as a function
+of $T_e$, and the energy balance \eqref{eq:energy_simplified} must be integrated in its full
+nonlinear form.  This is the regime of deliberate ionospheric modification, and it lies
+outside the theory developed here.
+
+\paragraph{The optical-depth condition $m_w \ll 1$.}
+This is the weaker assumption, used only once---to pass from the exact result
+\eqref{eq:crossmod} to the linearized envelope \eqref{eq:mw}.  Nothing in the physics
+requires it, and the exact form remains valid for any $m_w$.  What changes as $m_w$ grows
+is the \emph{shape} of the transferred modulation rather than its existence.  Writing the
+exact envelope
+\begin{equation}
+  \frac{E_w(t)}{E_w^{(0)}} = \exp\bigl[-m_w\cos(\Omega t - \phi)\bigr],
+  \label{eq:exact_env}
+\end{equation}
+the right-hand side is strictly positive for every $m_w$: the wanted signal is never
+extinguished, and $m_w$ is best read as a modulated optical depth rather than as a
+modulation depth bounded by unity.  Expanding \eqref{eq:exact_env} in the modified Bessel
+functions $I_k$,
+\begin{equation}
+  \exp\bigl[-m_w\cos\psi\bigr]
+    = I_0(m_w) + 2\sum_{k=1}^{\infty} (-1)^k I_k(m_w)\cos k\psi ,
+  \label{eq:bessel}
+\end{equation}
+shows what the linearization discards.  The term $k=1$ reproduces Eq.~\eqref{eq:mw}, since
+$I_1(m_w) \to m_w/2$ for small argument.  The terms $k \ge 2$ are harmonics of the audio
+modulation frequency, absent from the linearized treatment and growing with $m_w$: strong
+cross-modulation is \emph{distorted} cross-modulation.  Together with the phase lag $\phi$,
+which is itself frequency dependent, this harmonic generation is the origin of the sideband
+asymmetry observed in careful modern measurements of the effect \cite{boer2018}.
 
 %=============================================================================
 \section{Discussion}
@@ -664,10 +758,13 @@ of the Luxembourg effect within a tractable analytical framework.  Several aspec
 further discussion.
 
 \paragraph{Validity of the linearization.}
-The perturbative treatment assumes $\Delta T_e \ll T_0$, which is well satisfied for the
-power levels of the original 1933 observation.  For modern high-power ionospheric heaters
-(e.g., HAARP), the temperature perturbation can become comparable to or exceed $T_0$,
-requiring a nonlinear treatment of the energy balance.
+The two smallness conditions underlying the derivation are set out in
+Section~\ref{sec:validity}.  In summary: the thermal condition $\Delta T_e \ll T_0$ is
+satisfied at the power levels of the original 1933 observation, though by a margin of only a
+factor of a few rather than by orders of magnitude, and it fails outright for modern
+high-power heaters, where the energy balance must be treated nonlinearly.  The optical-depth
+condition $m_w \ll 1$ is inessential; relaxing it leaves the mechanism intact and adds
+harmonic distortion to the transferred modulation.
 
 \paragraph{Role of the Earth's magnetic field.}
 We neglected the geomagnetic field by setting $Y = 0$ in the Appleton--Hartree equation.
